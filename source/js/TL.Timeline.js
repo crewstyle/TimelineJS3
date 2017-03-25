@@ -169,6 +169,7 @@ TL.Timeline = TL.Class.extend({
 			marker_height_min: 			30,						// Minimum Marker Height
 			marker_width_min: 			100,					// Minimum Marker Width
 			marker_padding: 			5,						// Top Bottom Marker Padding
+			initial_zoom: 				3,						// Initialize timeline zoom
 			start_at_slide: 			0,
 			start_at_end: 				false,
 			start_after_today: 			false,					// Start timeline with the next item in comparison to today
