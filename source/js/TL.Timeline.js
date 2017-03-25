@@ -171,6 +171,7 @@ TL.Timeline = TL.Class.extend({
 			marker_padding: 			5,						// Top Bottom Marker Padding
 			start_at_slide: 			0,
 			start_at_end: 				false,
+			start_after_today: 			false,					// Start timeline with the next item in comparison to today
 			menubar_height: 			0,
 			skinny_size: 				650,
 			medium_size: 				800,
@@ -180,6 +181,7 @@ TL.Timeline = TL.Class.extend({
 			duration: 					1000,
 			ease: 						TL.Ease.easeInOutQuint,
 			// interaction
+			back_to_current: 			false,
 			dragging: 					true,
 			trackResize: 				true,
 			map_type: 					"stamen:toner-lite",
@@ -198,6 +200,9 @@ TL.Timeline = TL.Class.extend({
 
 		// Add message to DOM
 		this.message = new TL.Message({}, {message_class: "tl-message-full"}, this._el.container);
+
+		// Today's ID
+		this.today_id = 0;
 
 		// Merge Options
 		if (typeof(options.default_bg_color) == "string") {
@@ -849,7 +854,7 @@ TL.Timeline = TL.Class.extend({
 	},
 
 	_onBackToStart: function(e) {
-		this._storyslider.goTo(0);
+		this._storyslider.goTo(this.options.back_to_current ? this.today_id : 0);
 		this.fire("back_to_start", {unique_id:this.current_id}, this);
 	},
 
@@ -898,11 +903,32 @@ TL.Timeline = TL.Class.extend({
 	_onLoaded: function() {
 		if (this._loaded.storyslider && this._loaded.timenav) {
 			this.fire("loaded", this.config);
+
+			// Search for today's item ID
+			if (TL.Util.isTrue(this.options.start_after_today)) {
+				var itemDatum, itemDate, itemTime, todayId = 0;
+				var currentTime = Date.now();
+
+				for (var i = 0, len = this.config.events.length; i < len; i++) {
+					itemDatum = this.getData(i);
+					itemDate = new TL.BigDate(itemDatum.start_date);
+					itemTime = new Date(itemDate.data.data.date_obj).getTime();
+
+					if (itemTime > currentTime && todayId == 0) {
+						todayId = i;
+					}
+				}
+
+				this.today_id = todayId;
+			}
+
 			// Go to proper slide
 			if (this.options.hash_bookmark && window.location.hash != "") {
 				this.goToId(window.location.hash.replace("#event-", ""));
 			} else {
-				if( TL.Util.isTrue(this.options.start_at_end) || this.options.start_at_slide > this.config.events.length ) {
+				if (TL.Util.isTrue(this.options.start_after_today)) {
+					this.goTo(this.today_id);
+				} else if( TL.Util.isTrue(this.options.start_at_end) || this.options.start_at_slide > this.config.events.length ) {
 					this.goToEnd();
 				} else {
 					this.goTo(this.options.start_at_slide);
