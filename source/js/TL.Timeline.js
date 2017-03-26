@@ -740,6 +740,8 @@ TL.Timeline = TL.Class.extend({
 		this._menubar.on('zoom_out', this._onZoomOut, this);
 		this._menubar.on('back_to_start', this._onBackToStart, this);
 
+		// Document Events
+		document.on('keydown', this._onKeyDown, this);
 	},
 
 	/* Analytics
@@ -769,7 +771,6 @@ TL.Timeline = TL.Class.extend({
 		} else if (e.zoom == "out") {
 			this._menubar.toogleZoomOut(e.show);
 		}
-
 	},
 
 	/* Get index of event by id
@@ -810,7 +811,6 @@ TL.Timeline = TL.Class.extend({
 		}
 
 		this.ready = true;
-
 	},
 
 	showMessage: function(msg) {
@@ -857,6 +857,16 @@ TL.Timeline = TL.Class.extend({
 	_onBackToStart: function(e) {
 		this._storyslider.goTo(this.options.back_to_current ? this.today_id : 0);
 		this.fire("back_to_start", {unique_id:this.current_id}, this);
+	},
+
+	_onKeyDown: function(e) {
+		e = e || window.event;
+
+		if (e.keyCode == '39') {
+			this.fire("nav_previous", e);
+		} else if (e.keyCode == '37') {
+			this.fire("nav_next", e);
+		}
 	},
 
 	/**
@@ -938,7 +948,6 @@ TL.Timeline = TL.Class.extend({
 					this._updateHashBookmark(this.current_id);
 				}
 			}
-
 		}
 	}
 
